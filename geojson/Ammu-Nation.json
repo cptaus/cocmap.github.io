@@ -8,7 +8,7 @@
         "ptype": "Ammu-Nation"
       },
       "geometry": {
-        "type": "Point",
+        "type": "Pixel",
         "coordinates": [225, 402]
       }
     }
