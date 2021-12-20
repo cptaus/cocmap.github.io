@@ -9,7 +9,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [200, 400]
+        "coordinates": [-325, 32]
       }
     }, {
       "type": "Feature",
