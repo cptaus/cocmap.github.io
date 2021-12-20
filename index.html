@@ -448,6 +448,14 @@
         document.getElementById("map").style.background = "#000000";
       }
     });
+	map.on(L.Draw.Event.CREATED, function (event) {
+    var layer = event.layer;
+    var geojson = layer.toGeoJSON();
+    geojson.geometry.coordinates.forEach( function(point, index, arr)  {
+      arr[index] = map.project(point, map.getMaxZoom());
+    });
+    // save pixel gj
+});
   </script>
 </body>
 
