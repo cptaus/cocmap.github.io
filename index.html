@@ -4,12 +4,49 @@
 <html>
 
 <head>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="src/Toolbar.js"></script>
+	<script src="src/Tooltip.js"></script>
+	<script src="src/Leaflet.draw.js"></script>
+	<script src="src/Leaflet.Draw.Event.js"></script>
+	<script src="src/copyright.js"></script>
+	<script src="src/Control.Draw.js"></script>
+	
+	<script src="src/draw/DrawToolbar.js"></script>
+	<script src="src/draw/handler/Draw.Circle.js"></script>
+	<script src="src/draw/handler/Draw.CircleMarker.js"></script>
+	<script src="src/draw/handler/Draw.Feature.js"></script>
+	<script src="src/draw/handler/Draw.Marker.js"></script>
+	<script src="src/draw/handler/Draw.Polygon.js"></script>
+	<script src="src/draw/handler/Draw.Polyline.js"></script>
+	<script src="src/draw/handler/Draw.Rectangle.js"></script>
+	<script src="src/draw/handler/Draw.SimpleShape.js"></script>
+	
+	<script src="src/edit/EditToolbar.js"></script>
+	<script src="src/edit/handler/Edit.Circle.js"></script>
+	<script src="src/edit/handler/Edit.CircleMarker.js"></script>
+	<script src="src/edit/handler/Edit.Marker.js"></script>
+	<script src="src/edit/handler/Edit.Poly.js"></script>
+	<script src="src/edit/handler/Edit.Rectangle.js"></script>
+	<script src="src/edit/handler/Edit.SimpleShape.js"></script>
+	<script src="src/edit/handler/EditToolbar.Delete.js"></script>
+	<script src="src/edit/handler/EditToolbar.Edit.js"></script>
+	
+	<script src="src/ext/GeometryUtil.js"></script>
+	<script src="src/ext/LatLngUtil.js"></script>
+	<script src="src/ext/LineUtil.Intersect.js"></script>
+	<script src="src/ext/Polygon.Intersect.js"></script>
+	<script src="src/ext/Polyline.Intersect.js"></script>
+	<script src="src/ext/TouchEvents.js"></script>
+	
+	<link rel="stylesheet" href="src/leaflet.draw.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
   <style>
     .leaflet-popup-content-wrapper {
-      background-color: gray;
+      background-color: white;
     }
 
     .leaflet-control-layers-expanded {
@@ -26,7 +63,7 @@
     }
 
     .leaflet-popup-tip {
-      background-color: gray;
+      background-color: white;
       opacity: 0%;
 
     }
@@ -66,357 +103,246 @@
       height: 100%;
       width: 100%;
     }
+    /* Center the loader */
+#loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 120px;
+  height: 120px;
+  margin: -76px 0 0 -76px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Add animation to "page content" */
+.animate-bottom {
+  position: relative;
+  -webkit-animation-name: animatebottom;
+  -webkit-animation-duration: 1s;
+  animation-name: animatebottom;
+  animation-duration: 1.5s
+}
+
+@-webkit-keyframes animatebottom {
+  from { bottom:-100px; opacity:0 } 
+  to { bottom:0px; opacity:1 }
+}
+
+@keyframes animatebottom { 
+  from{ bottom:-100px; opacity:0 } 
+  to{ bottom:0; opacity:1 }
+}
+
+#myDiv {
+  display: none;
+  text-align: center;
+}
   </style>
 </head>
 <title>CoC Map</title>
-
-<body style="background-color:#0000">
+<div id="loader"></div>
+<body style="background-color:#0000" class="animate-bottom">
   <div id="map" style="width: 100%; height: 100%;background-color:#0;">
   </div>
   <script>
+  var myVar;
+
+    function myFunction() {
+  myVar = setTimeout(showPage, 3000);
+    }
+
+  function showPage() {
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("myDiv").style.display = "block";
+        }
+
+    var devtools = false;
+
     //Initialize Leaflet map
     var map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: 1.2,
+	  maxZoom: 5,
       maxBoundsViscosity: 1.0
-    });
+    }).setView([51.505, -0.09], 13);
+	
+	// FeatureGroup is to store editable layers
+     var drawnItems = new L.FeatureGroup();
+     map.addLayer(drawnItems);
+     var drawControl = new L.Control.Draw({
+         draw: {
+              polyline: false,
+              rectangle: false,
+             circle: false
+          },
+         edit: {
+             featureGroup: drawnItems
+			 
+         }
+     });
+     
+     var devtoolToggle = map.addControl(drawControl);
+	 
+	 
+	
     var bounds = [
       [0, 0],
       [500, 1000]
     ];
     //map.attributionControl.addAttribution('Designed by <a href= "www.jessejamesmedia.com">JJ Media</a> | GTA V &copy; <a href= "www.rockstargames.com">Rockstar Games</a>| Icons &copy<a href= "wwwicons8.com"> Icons8</a>');
     //Initialize each base layer
+	
     var worldmap = L.imageOverlay('images/gtav.jpg', bounds).addTo(map);
-    var politicsmap = L.imageOverlay('images/GTAV_SATELLITE_8192x8192.png', bounds)
+    var politicsmap = L.imageOverlay('images/PoliticalMap.png', bounds)
     var warmap = L.imageOverlay('images/GTAV_ROADMAP_8192x8192.png', bounds)
     map.fitBounds(bounds);
-    map.setMaxBounds(bounds)
+    map.setMaxBounds(bounds);
 
+
+
+	var devMarker = L.marker([300, 500], {draggable: true,}).addTo(map);
+	
+    
+	map.on('draw:created', function (e) {
+    var type = e.layerType,
+        layer = e.layer;
+
+    if (type === 'polygon') {
+        // export the coordinates from the layer
+        coordinates = [];
+        latlngs = layer.getLatLngs();
+        for (var i = 0; i < latlngs.length; i++) {
+            coordinates.push([latlngs[i]])
+        }
+        // Finally, show the poly as a geojson object in the console
+        console.log(layer.getLatLngs());
+   }
+   // here you add it to a layer to display it in the map
+   drawnItems.addLayer(layer).bindPopup(layer.getLatLngs().toString());
+});
+
+
+    if (map.hasLayer(devMarker)) {
+	//map.on('dblclick', function(e){
+	//	alert(devMarker.getLatLng().toString());
+	//})
+        map.on("keypress", function(e) {
+    var keyPressed = e.originalEvent.key;
+    if (keyPressed == "z") {
+        alert(devMarker.getLatLng().toString());	
+    }
+});
+    };
+
+    var iconReady = L.geoJson(null, {
+      pointToLayer: function(feature, latlng) {
+        //Create icon for marker
+        var marker = L.marker(latlng, {
+          icon: icn
+        });
+        //marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
+        return marker;
+      }
+    })
+	
     // Load each layer from it's corresponding GeoJSON file
-    var ammunation = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/ammunation.png',
-          iconSize: [48, 48], // size of the icon
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Ammu-Nation.json", function(data) {
-      ammunation.addData(data).addTo(map);
-    });
+    //$.getJSON("geojson/Ammu-Nation.json", function(data) {
+    //  ammunation.addData(data).addTo(map);
+    // });
+	
+	//iconsInGame
+	var tribeIcon = L.icon({
+    iconUrl: 'icons/tribes.png',
+    iconSize: [30, 30]
+	});
+	
+	
+	//TribeUngaBunga
+	//Icon
+    var tribesGroup =
+    Unga_Bunga_tribe_name = "Unga Bunga",
+    Bina_Buna_tribe_name = "Bina Buna",
+    Unga_Bunga_tribe = L.marker([341.03125, 598.796875], {icon: tribeIcon}, {interactive: true}, {riseOnHover: true}).addTo(map).bindPopup(Unga_Bunga_tribe_name),
+    Bina_Buna_tribe = L.marker([345.75, 600.84375], {icon: tribeIcon}, {interactive: true}, {riseOnHover: true}).addTo(map).bindPopup(Bina_Buna_tribe_name);
+    var Tribes = L.layerGroup([Unga_Bunga_tribe, Bina_Buna_tribe]);
+	//TeretoryPolygon
+	// create a red polyline from an array of LatLng points
 
-    var ammunationwrange = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/ammunationwrange.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Ammu-Nation with Range.json", function(data) {
-      ammunationwrange.addData(data);
-    });
+// define polygon coordinates
+var Unga_Bunga_tribe_Politics_latlngs = [
+	[344.25, 598.53125],[343.71875, 601.25],[340.40625, 600.34375],[338.59375, 598.96875],[335.75, 598.34375],[334.6875, 597.15625],[337.09375, 595.21875],[338.4375, 596.25],[341.125, 597.0625]
+];
+var Bina_Buna_tribe_politics_latlngs = [
+	[347.0625, 600.84375],[345.53125, 601.5625],[343.71875, 601.25],[344.25, 598.53125],[345.15625, 599.0625],[346.03125, 599.9375],[347, 599.71875]
+];
 
-    var barbershop = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/barbershop.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Barber Shop.json", function(data) {
-      barbershop.addData(data);
-    });
+L.geoJSON(geojsonTribes).addTo(map);
 
-    var repair = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/repairshop.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Repair Shop.json", function(data) {
-      repair.addData(data);
-    });
+// add the polygon to the map
+var Unga_Bunga_tribe_Politics =L.polygon(Unga_Bunga_tribe_Politics_latlngs, {color:"green"}).addTo(map).bindPopup(Unga_Bunga_tribe_name);
+var Bina_Buna_tribe_politics = L.polygon(Bina_Buna_tribe_politics_latlngs, {color:"blue"}).addTo(map).bindPopup(Bina_Buna_tribe_name);
+var TribesPoliticalPolygons = L.layerGroup([Unga_Bunga_tribe_Politics, Bina_Buna_tribe_politics]);
+	
+///DEV TOOLS
+///DEV TOOLS
+///DEV TOOLS
 
-    var clothing = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/clothingstore.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Clothing Stores.json", function(data) {
-      clothing.addData(data);
-    });
 
-    var cablecar = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/cablecar.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Cable Car.json", function(data) {
-      cablecar.addData(data);
-    });
 
-    var carwash = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/carwash.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Car Wash.json", function(data) {
-      carwash.addData(data);
-    });
 
-    var tattooparlor = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/tattooparlor.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Tattoo Parlor.json", function(data) {
-      tattooparlor.addData(data);
-    });
+///DEV TOOLS
+///DEV TOOLS
+///DEV TOOLS
 
-    var tennis = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/tennis.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Tennis.json", function(data) {
-      tennis.addData(data);
-    });
 
-    var fairride = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/fairride.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Fair Ride.json", function(data) {
-      fairride.addData(data);
-    });
-
-    var golf = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/golf.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Golf.json", function(data) {
-      golf.addData(data);
-    });
-
-    var hangerhelipad = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/hangerhelipad.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Hanger - Helipad.json", function(data) {
-      hangerhelipad.addData(data);
-    });
-
-    var safehouse = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/safehouse.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Safehouse.json", function(data) {
-      safehouse.addData(data);
-    });
-
-    var triathalon = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/triathalon.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Triathalon.json", function(data) {
-      triathalon.addData(data);
-    });
-
-    var movietheater = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/movietheater.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Movie Theater.json", function(data) {
-      movietheater.addData(data);
-    });
-
-    var stripclub = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/stripclub.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Strip Club.json", function(data) {
-      stripclub.addData(data);
-    });
-
-    var race = L.geoJson(null, {
-      pointToLayer: function(feature, latlng) {
-        //Create icon for marker
-        var icn = L.icon({
-          iconUrl: 'icons/race.png',
-          iconSize: [48, 48],
-        });
-        var marker = L.marker(latlng, {
-          icon: icn
-        });
-        marker.bindPopup("<font color=white><h4>" + feature.properties.name + '</h4>' + "<img src='" + feature.properties.imgname + "' class='popupImage'></font>");
-        return marker;
-      }
-    })
-    $.getJSON("geojson/Race.json", function(data) {
-      race.addData(data);
-    });
 
     //Create titles for each layer with mini icons to add to the Control
     var overlay = {
-      "<img src='icons/ammunation.png'align='center'width='30' height='30' /> Ammu-Nation": ammunation
+      "<img src='icons/tribes.png'align='center'width='30' height='30' /> Tribes": Tribes,
+	  "TribesPoliticalPolygons": TribesPoliticalPolygons,
+	  "Coordinate Me": devMarker,
+      "DevToolBar": devtoolToggle
     };
     //Create titles for each baselayer to add to the Control
     var baseLayers = {
       "World Map": worldmap,
-     // "Politics Map": politicsmap,
+      "DevTools": worldmap,
+      
      // "War Map": warmap,
 
     }
     //Create Control layer and add to map
     var over = L.control.layers(baseLayers, overlay, {
-      collapsed: true,
-      sortLayers: true
+      collapsed: false,
+      sortLayers: false
     }).addTo(map);
+	
+    if (map.hasLayer(devMarker)) {
+        if (devtools = !devtools){
+            devtools = !devtools;
+        }
+        else{
+            devtools = !devtools;
+        }
+        console.log(devtools);
+        }
 
-    //Add GTAV logo to lower left hand corner
+    //Add logo to lower left hand corner
     L.Control.Watermark = L.Control.extend({
       onAdd: function(map) {
 
@@ -433,7 +359,7 @@
     L.control.watermark({
       position: 'bottomleft'
     }).addTo(map);
-
+	
 
     //When the map's base layer is changed, change the color of the background
     //to match the map
@@ -447,13 +373,18 @@
       if (layer.name == "World Map") {
         document.getElementById("map").style.background = "#000000";
       }
+      if (layer.name == "DevTools") {
+        devtoolToggle;
+      }
     });
 	map.on(L.Draw.Event.CREATED, function (event) {
     var layer = event.layer;
     var geojson = layer.toGeoJSON();
     geojson.geometry.coordinates.forEach( function(point, index, arr)  {
       arr[index] = map.project(point, map.getMaxZoom());
+	  
     });
+	
     // save pixel gj
 });
   </script>

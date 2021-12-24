@@ -1,0 +1,29 @@
+{
+"type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "NIGA",
+        //"imgname":"images/ammunation/downtownlossantos.jpg",
+        //"ptype": "Ammu-Nation w/ Gun Range"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [325.75, 600.84375]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cypress Flats Ammu-Nation",
+        "imgname":"images/ammunation/cypressflats.png",
+        "ptype": "Ammu-Nation w/ Gun Range"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4290.5, 1249]
+      }
+    }
+  ]
+}
